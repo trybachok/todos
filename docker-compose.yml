@@ -108,12 +108,13 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
+    environment:
+      NOTES_BASE_URL: http://nginx:8080
     volumes:
       - bitrix:/var/www/html/bitrix
     depends_on:
-      installer:
-        condition: service_completed_successfully
-    command: ['sh', '-c', 'vendor/bin/php-cs-fixer check && vendor/bin/phpstan analyse']
+      - nginx
+    command: ['vendor/bin/phpunit']
 
 volumes:
   secrets:

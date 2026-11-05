@@ -33,6 +33,7 @@ COPY --from=composer:2.9 /usr/bin/composer /usr/bin/composer
 WORKDIR /opt/backend
 COPY backend/composer.json backend/composer.lock ./
 RUN composer install --no-interaction --no-progress --no-scripts --no-autoloader
+COPY docs/openapi.yaml /opt/docs/openapi.yaml
 COPY backend /opt/backend
 RUN composer dump-autoload --no-interaction
 USER www-data

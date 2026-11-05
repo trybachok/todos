@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 $finder = (new PhpCsFixer\Finder())
-    ->in([__DIR__ . '/local'])
+    ->in([__DIR__ . '/local', __DIR__ . '/tests'])
     ->ignoreDotFiles(false);
 
 return (new PhpCsFixer\Config())
