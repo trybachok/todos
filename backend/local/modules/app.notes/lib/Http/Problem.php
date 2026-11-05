@@ -12,9 +12,19 @@ use Bitrix\Main\HttpResponse;
  */
 final class Problem
 {
+    public static function badRequest(): HttpResponse
+    {
+        return self::create(400, 'Bad Request', 'Тело запроса должно быть JSON-объектом');
+    }
+
     public static function notFound(string $detail): HttpResponse
     {
         return self::create(404, 'Not Found', $detail);
+    }
+
+    public static function unsupportedMediaType(): HttpResponse
+    {
+        return self::create(415, 'Unsupported Media Type', 'Передайте тело запроса в формате application/json');
     }
 
     public static function invalid(ValidationErrors $errors): HttpResponse

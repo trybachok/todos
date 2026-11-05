@@ -38,8 +38,109 @@ paths:
                 $ref: '#/components/schemas/NotePage'
         '422':
           $ref: '#/components/responses/ValidationFailed'
+    post:
+      tags: [notes]
+      operationId: createNote
+      summary: Создать заметку
+      requestBody:
+        $ref: '#/components/requestBodies/NoteInput'
+      responses:
+        '201':
+          description: Заметка создана
+          headers:
+            Location:
+              description: Адрес созданной заметки
+              schema:
+                type: string
+                example: /api/notes/1
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+  /notes/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+    get:
+      tags: [notes]
+      operationId: getNote
+      summary: Заметка целиком
+      responses:
+        '200':
+          description: Заметка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [notes]
+      operationId: updateNote
+      summary: Изменить заметку
+      requestBody:
+        $ref: '#/components/requestBodies/NoteInput'
+      responses:
+        '200':
+          description: Заметка изменена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+    delete:
+      tags: [notes]
+      operationId: deleteNote
+      summary: Удалить заметку
+      responses:
+        '204':
+          description: Заметка удалена
+        '404':
+          $ref: '#/components/responses/NotFound'
 components:
+  requestBodies:
+    NoteInput:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NoteInput'
   responses:
+    BadRequest:
+      description: Тело запроса не является JSON-объектом
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: Заметка не найдена
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    UnsupportedMediaType:
+      description: Тело запроса передано не как application/json
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
     ValidationFailed:
       description: Данные не прошли проверку
       content:
@@ -47,6 +148,19 @@ components:
           schema:
             $ref: '#/components/schemas/ValidationProblem'
   schemas:
+    NoteInput:
+      type: object
+      additionalProperties: false
+      required: [title, content]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Пробелы по краям обрезаются, после этого заголовок не может быть пустым
+        content:
+          type: string
+          maxLength: 10000
     NoteSummary:
       type: object
       required: [id, title, createdAt, updatedAt]
@@ -62,6 +176,14 @@ components:
         updatedAt:
           type: string
           format: date-time
+    Note:
+      allOf:
+        - $ref: '#/components/schemas/NoteSummary'
+        - type: object
+          required: [content]
+          properties:
+            content:
+              type: string
     NotePage:
       type: object
       required: [items, hasMore]

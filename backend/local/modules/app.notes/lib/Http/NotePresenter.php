@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Notes\Http;
 
+use App\Notes\Domain\Note;
 use App\Notes\Domain\NoteList;
 use App\Notes\Domain\NoteSummary;
 
@@ -21,6 +22,14 @@ final class NotePresenter
             'items' => array_map(self::summary(...), $list->items),
             'hasMore' => $list->hasMore,
         ];
+    }
+
+    /**
+     * @return array{id: int, title: string, createdAt: string, updatedAt: string, content: string}
+     */
+    public static function note(Note $note): array
+    {
+        return self::summary($note) + ['content' => $note->content];
     }
 
     /**

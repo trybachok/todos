@@ -3,13 +3,20 @@ import type { components, paths } from './schema.gen';
 
 type Schemas = components['schemas'];
 export type NoteSummary = Schemas['NoteSummary'];
+export type Note = Schemas['Note'];
+export type NoteInput = Schemas['NoteInput'];
 export type NotePage = Schemas['NotePage'];
-export type Problem = Schemas['Problem'];
+export type Problem = Schemas['Problem'] &
+  Partial<Pick<Schemas['ValidationProblem'], 'errors'>>;
 
 export const PAGE_SIZE = 20;
 
 export interface NotesApi {
   list(offset: number): Promise<NotePage>;
+  get(id: number): Promise<Note>;
+  create(input: NoteInput): Promise<Note>;
+  update(id: number, input: NoteInput): Promise<Note>;
+  remove(id: number): Promise<void>;
 }
 
 /** The server answered with an error status. */
@@ -25,6 +32,7 @@ export class ApiError extends Error {
 
 export function createNotesApi(fetch = globalThis.fetch): NotesApi {
   const client = createClient<paths>({ baseUrl: '/api', fetch });
+  const note = (id: number) => ({ params: { path: { id } } });
 
   return {
     list: (offset) =>
@@ -33,6 +41,11 @@ export function createNotesApi(fetch = globalThis.fetch): NotesApi {
           params: { query: { limit: PAGE_SIZE, offset } },
         }),
       ),
+    get: (id) => unwrap(client.GET('/notes/{id}', note(id))),
+    create: (body) => unwrap(client.POST('/notes', { body })),
+    update: (id, body) =>
+      unwrap(client.PUT('/notes/{id}', { ...note(id), body })),
+    remove: (id) => unwrap(client.DELETE('/notes/{id}', note(id))),
   };
 }
 
