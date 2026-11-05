@@ -1,0 +1,104 @@
+openapi: 3.0.3
+info:
+  title: Notes API
+  version: 1.0.0
+  description: |
+    REST API мини-сервиса заметок. Авторизации нет.
+    Тело запросов и ответов — JSON. Ошибки возвращаются в формате RFC 9457 (`application/problem+json`).
+servers:
+  - url: /api
+tags:
+  - name: notes
+paths:
+  /notes:
+    get:
+      tags: [notes]
+      operationId: listNotes
+      summary: Список заметок, новые первыми
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Страница списка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotePage'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+components:
+  responses:
+    ValidationFailed:
+      description: Данные не прошли проверку
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ValidationProblem'
+  schemas:
+    NoteSummary:
+      type: object
+      required: [id, title, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    NotePage:
+      type: object
+      required: [items, hasMore]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/NoteSummary'
+        hasMore:
+          type: boolean
+          description: Есть ли заметки после этой страницы
+    Problem:
+      type: object
+      required: [type, title, status]
+      properties:
+        type:
+          type: string
+          example: about:blank
+        title:
+          type: string
+          example: Not Found
+        status:
+          type: integer
+          example: 404
+        detail:
+          type: string
+          example: Заметка не найдена
+    ValidationProblem:
+      allOf:
+        - $ref: '#/components/schemas/Problem'
+        - type: object
+          required: [errors]
+          properties:
+            errors:
+              type: object
+              description: Сообщение об ошибке для каждого неверного поля
+              additionalProperties:
+                type: string
+              example:
+                title: Введите заголовок

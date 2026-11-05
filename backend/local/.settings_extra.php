@@ -7,6 +7,10 @@ declare(strict_types=1);
 $errorTypes = E_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR;
 
 return [
+    'routing' => [
+        'value' => ['config' => ['api.php']],
+        'readonly' => true,
+    ],
     // The files engine queries b_cache_clean_path on every hit, APCu does not.
     // APCu is unavailable in CLI (installer, tests), where caching is not needed.
     'cache' => [

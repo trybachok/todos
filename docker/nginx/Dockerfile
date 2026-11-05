@@ -2,6 +2,7 @@ FROM node:24-alpine3.23 AS spa
 WORKDIR /app/frontend
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci --ignore-scripts --no-audit --no-fund
+COPY docs/openapi.yaml /app/docs/openapi.yaml
 COPY frontend ./
 RUN npm run build
 
