@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { NotesApiProvider } from './api/NotesApiContext';
 import { ApiError, createNotesApi } from './api/notesApi';
+import './styles.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {

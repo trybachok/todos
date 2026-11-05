@@ -97,6 +97,24 @@ services:
     depends_on:
       - php
 
+  tests:
+    image: notes-php-dev:latest
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      target: dev
+    profiles: [test]
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    volumes:
+      - bitrix:/var/www/html/bitrix
+    depends_on:
+      installer:
+        condition: service_completed_successfully
+    command: ['sh', '-c', 'vendor/bin/php-cs-fixer check && vendor/bin/phpstan analyse']
+
 volumes:
   secrets:
   db:

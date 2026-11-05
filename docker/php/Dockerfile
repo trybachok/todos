@@ -25,3 +25,14 @@ COPY backend/local /var/www/html/local
 COPY docker/installer /opt/installer
 
 USER www-data
+
+FROM app AS dev
+
+USER root
+COPY --from=composer:2.9 /usr/bin/composer /usr/bin/composer
+WORKDIR /opt/backend
+COPY backend/composer.json backend/composer.lock ./
+RUN composer install --no-interaction --no-progress --no-scripts --no-autoloader
+COPY backend /opt/backend
+RUN composer dump-autoload --no-interaction
+USER www-data

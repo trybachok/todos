@@ -1,0 +1,8 @@
+parameters:
+    level: max
+    paths:
+        - local
+    # The Bitrix core is not a Composer package: it lives in the bitrix volume of the tests container.
+    scanDirectories:
+        - /var/www/html/bitrix/modules/main/lib
+        - /var/www/html/bitrix/modules/main/classes/general

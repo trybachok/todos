@@ -1,0 +1,168 @@
+:root {
+  color-scheme: light dark;
+  background: Canvas;
+  color: CanvasText;
+  --accent: #2f6fde;
+  --danger: #c93c3c;
+  --border: color-mix(in srgb, currentColor 18%, transparent);
+  --muted: color-mix(in srgb, currentColor 60%, transparent);
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+button.primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+button.danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.app {
+  display: grid;
+  grid-template-columns: minmax(16rem, 22rem) 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-right: 1px solid var(--border);
+}
+
+.sidebar header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.note-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.note-list button {
+  width: 100%;
+  overflow: hidden;
+  border: 0;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.note-list button[aria-current='true'] {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+.pane {
+  max-width: 48rem;
+  padding: 1rem 2rem;
+}
+
+.note h2 {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.meta,
+.hint {
+  color: var(--muted);
+}
+
+.content {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.note-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.note-form input,
+.note-form textarea {
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+}
+
+.note-form label:not(:first-of-type) {
+  margin-top: 0.7rem;
+}
+
+.note-form [aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+.error,
+.field-error {
+  margin: 0;
+  color: var(--danger);
+}
+
+@media (width < 44rem) {
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .sidebar {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .pane {
+    padding: 1rem;
+  }
+}

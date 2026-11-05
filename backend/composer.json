@@ -1,0 +1,19 @@
+{
+    "name": "notes/backend",
+    "description": "Notes REST API: Bitrix D7 module app.notes",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": "~8.3.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.89",
+        "phpstan/phpstan": "^2.1"
+    },
+    "config": {
+        "platform": {
+            "php": "8.3.0"
+        },
+        "sort-packages": true
+    }
+}
