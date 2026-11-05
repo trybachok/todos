@@ -1,0 +1,103 @@
+name: notes
+
+x-hardening: &hardening
+  restart: unless-stopped
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+
+x-app-image: &app-image
+  image: notes-php:latest
+  build:
+    context: .
+    dockerfile: docker/php/Dockerfile
+    target: app
+
+x-db-env: &db-env
+  DB_HOST: db
+  DB_NAME: notes
+  DB_USER: notes
+
+services:
+  secrets:
+    image: alpine:3.23
+    command:
+      - sh
+      - -c
+      - |
+        for name in db_root_password db_password admin_password; do
+          [ -f /run/notes-secrets/$$name ] || head -c 24 /dev/urandom | od -An -tx1 | tr -d ' \n' > /run/notes-secrets/$$name
+        done
+        chmod 0444 /run/notes-secrets/*
+    volumes:
+      - secrets:/run/notes-secrets
+    restart: 'no'
+
+  db:
+    <<: *hardening
+    image: mysql:8.4
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    environment:
+      MYSQL_DATABASE: notes
+      MYSQL_USER: notes
+      MYSQL_PASSWORD_FILE: /run/notes-secrets/db_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/notes-secrets/db_root_password
+    volumes:
+      - db:/var/lib/mysql
+      - secrets:/run/notes-secrets:ro
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/notes.cnf:ro
+    depends_on:
+      secrets:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '--silent']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  installer:
+    <<: [*hardening, *app-image]
+    restart: 'no'
+    command: ['sh', '/opt/installer/install.sh']
+    environment:
+      <<: *db-env
+    volumes:
+      - bitrix:/var/www/html/bitrix
+      - secrets:/run/notes-secrets:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+  php:
+    <<: [*hardening, *app-image]
+    volumes:
+      - bitrix:/var/www/html/bitrix
+    depends_on:
+      installer:
+        condition: service_completed_successfully
+
+  nginx:
+    <<: *hardening
+    image: notes-nginx:latest
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    read_only: true
+    tmpfs:
+      - /tmp
+    ports:
+      - '${NOTES_HTTP_BIND:-127.0.0.1}:${NOTES_HTTP_PORT:-8080}:8080'
+    depends_on:
+      - php
+
+volumes:
+  secrets:
+  db:
+  bitrix:
