@@ -67,7 +67,7 @@ final class NoteQueryPlanTest extends TestCase
         }
 
         self::$repository->delete($note->id);
-        if ($result instanceof Note) {
+        if ($result instanceof Note && $result->id !== $note->id) {
             self::$repository->delete($result->id);
         }
     }

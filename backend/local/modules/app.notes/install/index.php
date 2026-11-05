@@ -21,24 +21,13 @@ class app_notes extends CModule
 
     public function DoInstall(): void
     {
-        $this->runSql('install.sql');
-        ModuleManager::registerModule($this->MODULE_ID);
-    }
-
-    public function DoUninstall(): void
-    {
-        ModuleManager::unRegisterModule($this->MODULE_ID);
-        $this->runSql('uninstall.sql');
-    }
-
-    private function runSql(string $file): void
-    {
         /** @var Connection $connection */
         $connection = Application::getConnection();
         /** @var list<string> $errors */
-        $errors = $connection->executeSqlBatch((string) file_get_contents(__DIR__ . '/db/mysql/' . $file));
+        $errors = $connection->executeSqlBatch((string) file_get_contents(__DIR__ . '/db/mysql/install.sql'));
         if ($errors !== []) {
             throw new RuntimeException(implode('; ', $errors));
         }
+        ModuleManager::registerModule($this->MODULE_ID);
     }
 }

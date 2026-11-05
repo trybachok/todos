@@ -7,6 +7,9 @@ COPY frontend ./
 RUN npm run build
 
 FROM nginxinc/nginx-unprivileged:1.28-alpine3.23
+# The root file system is read-only, /tmp is the writable tmpfs.
+ENV NGINX_ENVSUBST_OUTPUT_DIR=/tmp
+COPY docker/nginx/real-ip.conf.template /etc/nginx/templates/real-ip.conf.template
 COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY docker/nginx/security-headers.conf /etc/nginx/snippets/security-headers.conf
 COPY --from=spa /app/frontend/dist /srv/notes

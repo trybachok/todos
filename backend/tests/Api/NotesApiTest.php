@@ -21,6 +21,7 @@ use Psr\Http\Message\ResponseInterface;
 final class NotesApiTest extends TestCase
 {
     private const string MISSING_ID = '4294967295';
+    private const array VALID_BODY = ['json' => ['title' => 'Итог', 'content' => '']];
 
     private static Client $http;
     private static ResponseValidator $contract;
@@ -102,16 +103,14 @@ final class NotesApiTest extends TestCase
      */
     public static function invalidRequests(): iterable
     {
-        $body = ['json' => ['title' => 'Итог', 'content' => '']];
-
         yield 'list with too large a page' => ['GET', '/notes', ['query' => ['limit' => 101]], 'limit'];
         yield 'create with a blank title' => ['POST', '/notes', ['json' => ['title' => ' ', 'content' => '']], 'title'];
         yield 'view by a malformed id' => ['GET', '/notes/{id}', [], 'id', 'abc'];
-        yield 'edit by a malformed id' => ['PUT', '/notes/{id}', $body, 'id', '0'];
+        yield 'edit by a malformed id' => ['PUT', '/notes/{id}', self::VALID_BODY, 'id', '0'];
         yield 'edit with an unknown field' => [
             'PUT',
             '/notes/{id}',
-            ['json' => ['title' => 'Итог', 'content' => '', 'createdAt' => '2000-01-01T00:00:00+00:00']],
+            ['json' => self::VALID_BODY['json'] + ['createdAt' => '2000-01-01T00:00:00+00:00']],
             'createdAt',
         ];
         yield 'delete by a malformed id' => ['DELETE', '/notes/{id}', [], 'id', '1.5'];
@@ -138,10 +137,8 @@ final class NotesApiTest extends TestCase
      */
     public static function missingNotes(): iterable
     {
-        $body = ['json' => ['title' => 'Итог', 'content' => '']];
-
         yield 'view' => ['GET', self::MISSING_ID, []];
-        yield 'edit' => ['PUT', self::MISSING_ID, $body];
+        yield 'edit' => ['PUT', self::MISSING_ID, self::VALID_BODY];
         yield 'delete' => ['DELETE', self::MISSING_ID, []];
     }
 

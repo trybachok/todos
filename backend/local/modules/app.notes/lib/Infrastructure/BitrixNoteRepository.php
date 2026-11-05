@@ -60,12 +60,7 @@ final class BitrixNoteRepository implements NoteRepository
     public function create(NoteInput $input): Note
     {
         $now = new DateTime();
-        $values = self::sqlValues([
-            'TITLE' => $input->title,
-            'CONTENT' => $input->content,
-            'CREATED_AT' => $now,
-            'UPDATED_AT' => $now,
-        ]);
+        $values = self::sqlValues(['CREATED_AT' => $now] + self::savedColumns($input, $now));
 
         $connection = self::connection();
         $connection->queryExecute(sprintf(
@@ -87,11 +82,7 @@ final class BitrixNoteRepository implements NoteRepository
         }
 
         $now = new DateTime();
-        $values = self::sqlValues([
-            'TITLE' => $input->title,
-            'CONTENT' => $input->content,
-            'UPDATED_AT' => $now,
-        ]);
+        $values = self::sqlValues(self::savedColumns($input, $now));
         $assignments = array_map(
             static fn(string $column, string $value): string => "{$column} = {$value}",
             array_keys($values),
@@ -108,6 +99,16 @@ final class BitrixNoteRepository implements NoteRepository
         $connection->queryExecute(sprintf('DELETE FROM %s WHERE ID = %d', self::table(), $id));
 
         return $connection->getAffectedRowsCount() > 0;
+    }
+
+    /**
+     * The columns that both creating and editing write.
+     *
+     * @return array<string, mixed>
+     */
+    private static function savedColumns(NoteInput $input, DateTime $now): array
+    {
+        return ['TITLE' => $input->title, 'CONTENT' => $input->content, 'UPDATED_AT' => $now];
     }
 
     /**

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Notes\Http;
 
+use App\Notes\Domain\Note;
 use App\Notes\Domain\NoteInput;
 use App\Notes\Domain\NoteRepository;
 use App\Notes\Domain\NoteValidator;
@@ -71,9 +72,7 @@ final class NoteController extends Controller
             return $noteId;
         }
 
-        $note = $this->notes->find($noteId);
-
-        return $note === null ? Problem::notFound(self::NOT_FOUND) : JsonResponse::create(NotePresenter::note($note));
+        return $this->noteResponse($this->notes->find($noteId));
     }
 
     public function createAction(): HttpResponse
@@ -99,9 +98,7 @@ final class NoteController extends Controller
             return $input;
         }
 
-        $note = $this->notes->update($noteId, $input);
-
-        return $note === null ? Problem::notFound(self::NOT_FOUND) : JsonResponse::create(NotePresenter::note($note));
+        return $this->noteResponse($this->notes->update($noteId, $input));
     }
 
     public function deleteAction(string $id): HttpResponse
@@ -122,6 +119,14 @@ final class NoteController extends Controller
         $noteId = $this->validator->validateId($id);
 
         return $noteId instanceof ValidationErrors ? Problem::invalid($noteId) : $noteId;
+    }
+
+    /**
+     * The note or the not found error when there is no such note.
+     */
+    private function noteResponse(?Note $note): HttpResponse
+    {
+        return $note === null ? Problem::notFound(self::NOT_FOUND) : JsonResponse::create(NotePresenter::note($note));
     }
 
     /**

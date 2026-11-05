@@ -6,7 +6,7 @@ export type NoteSummary = Schemas['NoteSummary'];
 export type Note = Schemas['Note'];
 export type NoteInput = Schemas['NoteInput'];
 export type NotePage = Schemas['NotePage'];
-export type Problem = Schemas['Problem'] &
+type Problem = Schemas['Problem'] &
   Partial<Pick<Schemas['ValidationProblem'], 'errors'>>;
 
 export const PAGE_SIZE = 20;
