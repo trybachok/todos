@@ -98,27 +98,32 @@ final class NotesApiTest extends TestCase
     }
 
     /**
-     * @return iterable<string, array{string, string, RequestOptions, string}>
+     * @return iterable<string, array{0: string, 1: string, 2: RequestOptions, 3: string, 4?: string}>
      */
     public static function invalidRequests(): iterable
     {
+        $body = ['json' => ['title' => 'Итог', 'content' => '']];
+
         yield 'list with too large a page' => ['GET', '/notes', ['query' => ['limit' => 101]], 'limit'];
         yield 'create with a blank title' => ['POST', '/notes', ['json' => ['title' => ' ', 'content' => '']], 'title'];
+        yield 'view by a malformed id' => ['GET', '/notes/{id}', [], 'id', 'abc'];
+        yield 'edit by a malformed id' => ['PUT', '/notes/{id}', $body, 'id', '0'];
         yield 'edit with an unknown field' => [
             'PUT',
             '/notes/{id}',
             ['json' => ['title' => 'Итог', 'content' => '', 'createdAt' => '2000-01-01T00:00:00+00:00']],
             'createdAt',
         ];
+        yield 'delete by a malformed id' => ['DELETE', '/notes/{id}', [], 'id', '1.5'];
     }
 
     /**
      * @param RequestOptions $options
      */
     #[DataProvider('invalidRequests')]
-    public function testRejectsInvalidDataWithFieldErrors(string $method, string $path, array $options, string $field): void
+    public function testRejectsInvalidDataWithFieldErrors(string $method, string $path, array $options, string $field, ?string $id = null): void
     {
-        $id = str_contains($path, '{id}') ? (string) $this->createNote('Черновик')['id'] : null;
+        $id ??= str_contains($path, '{id}') ? (string) $this->createNote('Черновик')['id'] : null;
 
         $response = $this->call($method, $path, $id, $options);
 
@@ -136,7 +141,6 @@ final class NotesApiTest extends TestCase
         $body = ['json' => ['title' => 'Итог', 'content' => '']];
 
         yield 'view' => ['GET', self::MISSING_ID, []];
-        yield 'view by a malformed id' => ['GET', 'abc', []];
         yield 'edit' => ['PUT', self::MISSING_ID, $body];
         yield 'delete' => ['DELETE', self::MISSING_ID, []];
     }

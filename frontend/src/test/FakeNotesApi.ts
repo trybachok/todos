@@ -67,6 +67,7 @@ export class FakeNotesApi implements NotesApi {
         type: 'about:blank',
         title: 'Not Found',
         status: 404,
+        detail: 'Заметка не найдена',
       });
     }
     return note;

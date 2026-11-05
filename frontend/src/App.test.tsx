@@ -96,6 +96,24 @@ describe('Notes app', () => {
     expect(await listedTitles()).toEqual(['Первая']);
   });
 
+  it('reports that a deleted note is gone while the list still shows it', async () => {
+    const api = new FakeNotesApi(['Лишняя']);
+    const user = renderApp(api);
+    await user.click(await screen.findByRole('button', { name: 'Лишняя' }));
+    await user.click(await screen.findByRole('button', { name: 'Удалить' }));
+    // A slow connection: the list refresh after the deletion has not finished yet.
+    api.list = () => new Promise<never>(() => {});
+    await user.click(screen.getByRole('button', { name: 'Да, удалить' }));
+    await screen.findByText('Заметка удалена');
+
+    await user.click(screen.getByRole('button', { name: 'Лишняя' }));
+
+    expect(screen.queryByText('Текст: Лишняя')).toBeNull();
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Заметка не найдена',
+    );
+  });
+
   it('shows field errors returned by the server', async () => {
     const api = new FakeNotesApi();
     api.create = vi.fn().mockRejectedValue(

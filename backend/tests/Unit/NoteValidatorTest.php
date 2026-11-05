@@ -76,6 +76,31 @@ final class NoteValidatorTest extends TestCase
         self::assertSame($fields, array_keys($result->errors));
     }
 
+    public function testAcceptsValidId(): void
+    {
+        self::assertSame(1, $this->validator->validateId('1'));
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function invalidIds(): iterable
+    {
+        yield 'zero' => ['0'];
+        yield 'not a number' => ['abc'];
+        yield 'fraction' => ['1.5'];
+        yield 'beyond the integer range' => ['9223372036854775808'];
+    }
+
+    #[DataProvider('invalidIds')]
+    public function testRejectsInvalidId(string $id): void
+    {
+        $result = $this->validator->validateId($id);
+
+        self::assertInstanceOf(ValidationErrors::class, $result);
+        self::assertSame(['id'], array_keys($result->errors));
+    }
+
     /**
      * @return iterable<string, array{array<string, mixed>, Page}>
      */

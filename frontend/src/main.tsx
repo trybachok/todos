@@ -1,20 +1,11 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { NotesApiProvider } from './api/NotesApiContext';
-import { ApiError, createNotesApi } from './api/notesApi';
+import { createNotesApi } from './api/notesApi';
+import { createQueryClient } from './queryClient';
 import './styles.css';
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 60_000,
-      // A server answer does not change on retry, a lost connection may recover.
-      retry: (failures, error) => !(error instanceof ApiError) && failures < 2,
-    },
-  },
-});
 
 const root = document.getElementById('root');
 if (root === null) {
@@ -23,7 +14,7 @@ if (root === null) {
 
 createRoot(root).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={createQueryClient()}>
       <NotesApiProvider api={createNotesApi()}>
         <App />
       </NotesApiProvider>

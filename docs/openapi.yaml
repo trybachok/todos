@@ -84,6 +84,8 @@ paths:
                 $ref: '#/components/schemas/Note'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
     put:
       tags: [notes]
       operationId: updateNote
@@ -114,6 +116,8 @@ paths:
           description: Заметка удалена
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
 components:
   requestBodies:
     NoteInput:

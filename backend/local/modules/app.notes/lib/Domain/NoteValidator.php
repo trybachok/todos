@@ -48,13 +48,18 @@ final class NoteValidator
         return new ValidationErrors($errors);
     }
 
+    public function validateId(string $id): int|ValidationErrors
+    {
+        return self::integer($id, 1, PHP_INT_MAX) ?? new ValidationErrors(['id' => 'Укажите целое положительное число']);
+    }
+
     /**
      * @param array<mixed> $query Query string parameters.
      */
     public function validatePage(array $query): Page|ValidationErrors
     {
-        $limit = self::integer($query['limit'] ?? null, self::PAGE_DEFAULT_LIMIT, 1, self::PAGE_MAX_LIMIT);
-        $offset = self::integer($query['offset'] ?? null, 0, 0, PHP_INT_MAX);
+        $limit = self::integer($query['limit'] ?? self::PAGE_DEFAULT_LIMIT, 1, self::PAGE_MAX_LIMIT);
+        $offset = self::integer($query['offset'] ?? 0, 0, PHP_INT_MAX);
 
         if ($limit !== null && $offset !== null) {
             return new Page($limit, $offset);
@@ -72,14 +77,10 @@ final class NoteValidator
     }
 
     /**
-     * Returns the default for a missing value and null for an invalid one.
+     * Null for anything but an integer within the range.
      */
-    private static function integer(mixed $value, int $default, int $min, int $max): ?int
+    private static function integer(mixed $value, int $min, int $max): ?int
     {
-        if ($value === null) {
-            return $default;
-        }
-
         $integer = filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => $min, 'max_range' => $max]]);
 
         return is_int($integer) ? $integer : null;

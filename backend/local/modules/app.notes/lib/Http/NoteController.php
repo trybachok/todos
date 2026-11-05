@@ -64,9 +64,14 @@ final class NoteController extends Controller
             : JsonResponse::create(NotePresenter::list($this->notes->list($page)));
     }
 
-    public function viewAction(int $id): HttpResponse
+    public function viewAction(string $id): HttpResponse
     {
-        $note = $this->notes->find($id);
+        $noteId = $this->noteId($id);
+        if ($noteId instanceof HttpResponse) {
+            return $noteId;
+        }
+
+        $note = $this->notes->find($noteId);
 
         return $note === null ? Problem::notFound(self::NOT_FOUND) : JsonResponse::create(NotePresenter::note($note));
     }
@@ -83,21 +88,40 @@ final class NoteController extends Controller
         return JsonResponse::create(NotePresenter::note($note), 201)->addHeader('Location', "/api/notes/{$note->id}");
     }
 
-    public function updateAction(int $id): HttpResponse
+    public function updateAction(string $id): HttpResponse
     {
+        $noteId = $this->noteId($id);
+        if ($noteId instanceof HttpResponse) {
+            return $noteId;
+        }
         $input = $this->input();
         if ($input instanceof HttpResponse) {
             return $input;
         }
 
-        $note = $this->notes->update($id, $input);
+        $note = $this->notes->update($noteId, $input);
 
         return $note === null ? Problem::notFound(self::NOT_FOUND) : JsonResponse::create(NotePresenter::note($note));
     }
 
-    public function deleteAction(int $id): HttpResponse
+    public function deleteAction(string $id): HttpResponse
     {
-        return $this->notes->delete($id) ? (new HttpResponse())->setStatus('204') : Problem::notFound(self::NOT_FOUND);
+        $noteId = $this->noteId($id);
+        if ($noteId instanceof HttpResponse) {
+            return $noteId;
+        }
+
+        return $this->notes->delete($noteId) ? (new HttpResponse())->setStatus('204') : Problem::notFound(self::NOT_FOUND);
+    }
+
+    /**
+     * The validated note id from the path or the error response.
+     */
+    private function noteId(string $id): int|HttpResponse
+    {
+        $noteId = $this->validator->validateId($id);
+
+        return $noteId instanceof ValidationErrors ? Problem::invalid($noteId) : $noteId;
     }
 
     /**
