@@ -12,7 +12,8 @@ type Problem = Schemas['Problem'] &
 export const PAGE_SIZE = 20;
 
 export interface NotesApi {
-  list(offset: number): Promise<NotePage>;
+  /** Notes older than the one with id `before`, or the newest ones. */
+  list(before?: number): Promise<NotePage>;
   get(id: number): Promise<Note>;
   create(input: NoteInput): Promise<Note>;
   update(id: number, input: NoteInput): Promise<Note>;
@@ -35,10 +36,10 @@ export function createNotesApi(fetch = globalThis.fetch): NotesApi {
   const note = (id: number) => ({ params: { path: { id } } });
 
   return {
-    list: (offset) =>
+    list: (before) =>
       unwrap(
         client.GET('/notes', {
-          params: { query: { limit: PAGE_SIZE, offset } },
+          params: { query: { limit: PAGE_SIZE, before } },
         }),
       ),
     get: (id) => unwrap(client.GET('/notes/{id}', note(id))),

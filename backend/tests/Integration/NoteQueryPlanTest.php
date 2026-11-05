@@ -38,7 +38,8 @@ final class NoteQueryPlanTest extends TestCase
      */
     public static function operations(): iterable
     {
-        yield 'list' => [static fn(NoteRepository $notes): mixed => $notes->list(new Page(20, 0)), 1];
+        yield 'first page' => [static fn(NoteRepository $notes): mixed => $notes->list(new Page(20, PHP_INT_MAX)), 1];
+        yield 'next page' => [static fn(NoteRepository $notes, int $id): mixed => $notes->list(new Page(20, $id)), 1];
         yield 'view' => [static fn(NoteRepository $notes, int $id): mixed => $notes->find($id), 1];
         yield 'create' => [static fn(NoteRepository $notes): mixed => $notes->create(new NoteInput('План', '')), 1];
         yield 'edit' => [static fn(NoteRepository $notes, int $id): mixed => $notes->update($id, new NoteInput('План', 'итог')), 2];

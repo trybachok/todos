@@ -69,7 +69,7 @@ final class NotesApiTest extends TestCase
         $newer = $this->createNote('Вторая');
 
         $first = $this->decode($this->call('GET', '/notes', options: ['query' => ['limit' => 1]]));
-        $second = $this->decode($this->call('GET', '/notes', options: ['query' => ['limit' => 1, 'offset' => 1]]));
+        $second = $this->decode($this->call('GET', '/notes', options: ['query' => ['limit' => 1, 'before' => $newer['id']]]));
 
         self::assertEquals(['items' => [$this->summary($newer)], 'hasMore' => true], $first);
         self::assertEquals([$this->summary($older)], $second['items']);

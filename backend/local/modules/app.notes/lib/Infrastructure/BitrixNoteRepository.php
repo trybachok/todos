@@ -28,13 +28,14 @@ final class BitrixNoteRepository implements NoteRepository
 
     public function list(Page $page): NoteList
     {
+        // A range of the primary key reads only the rows of the page, an OFFSET would read all the rows before it.
         // One row more than the page tells whether there is a next page without COUNT(*).
         /** @var list<SummaryRow> $rows */
         $rows = NoteTable::getList([
             'select' => self::SUMMARY_FIELDS,
+            'filter' => ['<ID' => $page->before],
             'order' => ['ID' => 'DESC'],
             'limit' => $page->limit + 1,
-            'offset' => $page->offset,
         ])->fetchAll();
 
         return new NoteList(

@@ -59,18 +59,19 @@ final class NoteValidator
     public function validatePage(array $query): Page|ValidationErrors
     {
         $limit = self::integer($query['limit'] ?? self::PAGE_DEFAULT_LIMIT, 1, self::PAGE_MAX_LIMIT);
-        $offset = self::integer($query['offset'] ?? 0, 0, PHP_INT_MAX);
+        // Without a cursor the page starts with the newest note.
+        $before = self::integer($query['before'] ?? PHP_INT_MAX, 1, PHP_INT_MAX);
 
-        if ($limit !== null && $offset !== null) {
-            return new Page($limit, $offset);
+        if ($limit !== null && $before !== null) {
+            return new Page($limit, $before);
         }
 
         $errors = [];
         if ($limit === null) {
             $errors['limit'] = sprintf('Укажите целое число от 1 до %d', self::PAGE_MAX_LIMIT);
         }
-        if ($offset === null) {
-            $errors['offset'] = 'Укажите целое неотрицательное число';
+        if ($before === null) {
+            $errors['before'] = 'Укажите целое положительное число';
         }
 
         return new ValidationErrors($errors);

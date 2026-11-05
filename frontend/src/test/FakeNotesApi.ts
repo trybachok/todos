@@ -16,17 +16,20 @@ export class FakeNotesApi implements NotesApi {
     titles.forEach((title) => this.add({ title, content: `Текст: ${title}` }));
   }
 
-  async list(offset: number): Promise<NotePage> {
+  async list(before?: number): Promise<NotePage> {
+    const older = this.notes.filter(
+      (note) => before === undefined || note.id < before,
+    );
     return {
-      items: this.notes
-        .slice(offset, offset + PAGE_SIZE)
+      items: older
+        .slice(0, PAGE_SIZE)
         .map(({ id, title, createdAt, updatedAt }) => ({
           id,
           title,
           createdAt,
           updatedAt,
         })),
-      hasMore: offset + PAGE_SIZE < this.notes.length,
+      hasMore: older.length > PAGE_SIZE,
     };
   }
 

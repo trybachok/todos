@@ -40,6 +40,21 @@ describe('Notes app', () => {
     expect(screen.queryByRole('button', { name: 'Показать ещё' })).toBeNull();
   });
 
+  it('keeps every loaded note when a new one is added', async () => {
+    const user = renderApp(new FakeNotesApi(titles(25)));
+    await user.click(
+      await screen.findByRole('button', { name: 'Показать ещё' }),
+    );
+    await screen.findByRole('button', { name: 'Заметка 1' });
+
+    await user.click(screen.getByRole('button', { name: 'Новая заметка' }));
+    await user.type(screen.getByLabelText('Заголовок'), 'Новая');
+    await user.click(screen.getByRole('button', { name: 'Сохранить' }));
+
+    await screen.findByRole('button', { name: 'Новая' });
+    expect(await listedTitles()).toEqual(['Новая', ...titles(25).reverse()]);
+  });
+
   it('opens a note from the list', async () => {
     const user = renderApp(new FakeNotesApi(['Первая', 'Вторая']));
 

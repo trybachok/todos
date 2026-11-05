@@ -106,9 +106,9 @@ final class NoteValidatorTest extends TestCase
      */
     public static function validPages(): iterable
     {
-        yield 'defaults' => [[], new Page(20, 0)];
-        yield 'smallest page' => [['limit' => '1', 'offset' => '0'], new Page(1, 0)];
-        yield 'largest page' => [['limit' => '100', 'offset' => '40'], new Page(100, 40)];
+        yield 'defaults' => [[], new Page(20, PHP_INT_MAX)];
+        yield 'smallest page' => [['limit' => '1', 'before' => '1'], new Page(1, 1)];
+        yield 'largest page' => [['limit' => '100', 'before' => '40'], new Page(100, 40)];
     }
 
     /**
@@ -129,8 +129,8 @@ final class NoteValidatorTest extends TestCase
         yield 'limit above maximum' => [['limit' => '101'], ['limit']];
         yield 'limit is not an integer' => [['limit' => '1.5'], ['limit']];
         yield 'limit is an array' => [['limit' => ['1']], ['limit']];
-        yield 'offset is negative' => [['offset' => '-1'], ['offset']];
-        yield 'offset is not a number' => [['offset' => 'abc'], ['offset']];
+        yield 'before is zero' => [['before' => '0'], ['before']];
+        yield 'before is not a number' => [['before' => 'abc'], ['before']];
     }
 
     /**

@@ -23,12 +23,12 @@ paths:
             minimum: 1
             maximum: 100
             default: 20
-        - name: offset
+        - name: before
           in: query
+          description: ID последней полученной заметки; без параметра список начинается с самой новой
           schema:
             type: integer
-            minimum: 0
-            default: 0
+            minimum: 1
       responses:
         '200':
           description: Страница списка
